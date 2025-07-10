@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Add New Contact</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <nav class="navbar navbar-dark bg-primary">
+        <span class="navbar-brand mb-0 h1 mx-auto">Contact Book</span>
+    </nav>
+    <div class="container-fluid">
+        <br />
+        <div id="messageArea" class="mt-3"></div>
+
+        <form id="editForm">
+            <div class="form-group">
+                <label for="firstname">Firstname</label>
+                <input type="text" class="form-control" name="firstname" id="firstname">
+            </div>
+            <div class="form-group">
+                <label for="lastname">Lastname</label>
+                <input type="text" class="form-control" name="lastname" id="lastname">
+            </div>
+            <div class="form-group">
+                <label for="mobile">Mobile</label>
+                <input type="text" class="form-control" name="mobile" id="mobile">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="text" class="form-control" name="email" id="email">
+            </div>
+            <div class="form-group">
+                <label for="avatar">Select a file</label>
+                <input type="file" class="form-control-file" name="avatar" id="avatar">
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="submitForm">Submit</button>
+        </form>
+
+    </div>
+
+    <footer class="footer fixed-bottom bg-primary">
+        <div class="container">
+            <div class="row no-gutters">
+                <div class="col" style="text-align:center; color:white">
+                    <button id="homeLink" type="button" class="btn btn-primary"><i class="fa fa-home"></i></button>
+                </div>
+                <div class="col" style="text-align:center; color:white">
+                    <button id="saveContactFooterButton" type="button" class="btn btn-primary"><i class="fa fa-save"></i></button>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script>
+        document.getElementById("submitForm").addEventListener('click', submitForm);
+        document.getElementById("saveContactFooterButton").addEventListener('click', submitForm);
+        document.getElementById("homeLink").addEventListener('click', homeLink);
+
+        async function submitForm(e) {
+            e.preventDefault();
+
+            const firstName = document.getElementById('firstname').value.trim();
+            const lastName = document.getElementById('lastname').value.trim();
+            const avatarFile = document.getElementById('avatar').files[0];
+
+            if (!firstName) {
+                showMessage('First name cannot be empty.', 'error');
+                return;
+            }
+
+            if (!lastName) {
+                showMessage('Last name cannot be empty.', 'error');
+                return;
+            }
+
+            if (!avatarFile) {
+                showMessage('Please select a profile image.', 'error');
+                return;
+            }
+
+            const form = new FormData(document.querySelector('#editForm'));
+            form.append('apiKey', apikey);
+
+            try {
+                const response = await fetch(apiEndpoints.insertContact, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json, */*',
+                    },
+                    body: form
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.text();
+
+                if (data == "1") {
+                    showMessage("Contact added successfully!", "success");
+                    setTimeout(() => { window.open("index.html", "_self"); }, 1500);
+                } else {
+                    showMessage("Error: " + data, "error");
+                }
+            } catch (error) {
+                console.error('Error adding contact:', error);
+                showMessage('Failed to add contact. Please try again.', 'error');
+            }
+        }
+
+        function homeLink() {
+            window.open("index.html", "_self");
+        }
+    </script>
+</body>
+
+</html>
